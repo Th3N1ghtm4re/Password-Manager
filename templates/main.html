@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class ="container">
+    <div class="container">
+        <button id="add-website-button" class="add-website-button">Add Website</button>
+        
+        <h2>Password Manager</h2>
+        
+        <div class="credentials">
+            {% for credential in stored_credentials %}
+                <div class="credential">
+                    <p><strong>Website:</strong> {{ credential.website }}</p>
+                    <p><strong>Username:</strong> {{ credential.username }}</p>
+                    <p><strong>Password:</strong> 
+                        <span id="password-{{ credential.id }}" class="password-hidden" data-password="{{ credential.password }}">********</span>
+                        <input type="checkbox" id="show-password-{{ credential.id }}" class="show-password-checkbox">
+                        <label for="show-password-{{ credential.id }}"></label>
+                    </p>
+                    <form action="{{ url_for('delete_credential', id=credential.id) }}" method="post">
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div id="add-website-form" class="add-website-form hidden">
+            <h3>Add New Credential:</h3>
+            <form action="{{ url_for('add_credentials') }}" method="post">
+                <p>Website: <input type="text" name="website" required></p>
+                <p>Username: <input type="text" name="username" required></p>
+                <p>Password: <input type="password" name="password" required></p>
+                <p><input type="submit" value="Add" class="add-button"></p>
+            </form>
+        </div>
+        
+        <form action="{{ url_for('logout') }}" method="post">
+            <input type="submit" value="Logout" class="logout-button">
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var addWebsiteButton = document.getElementById('add-website-button');
+            var addWebsiteForm = document.getElementById('add-website-form');
+            addWebsiteButton.addEventListener('click', function() {
+                addWebsiteForm.classList.toggle('hidden');
+            });
+
+            var checkboxes = document.querySelectorAll('.show-password-checkbox');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    var passwordId = this.id.replace('show-password-', '');
+                    var passwordSpan = document.getElementById('password-' + passwordId);
+                    if (this.checked) {
+                        passwordSpan.textContent = passwordSpan.dataset.password;
+                    } else {
+                        passwordSpan.textContent = '********';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
